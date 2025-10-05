@@ -6,7 +6,7 @@ trigger:
 variables:
   # Variables de entorno
   ACR_NAME: 'acrfinaldevops' # Colocar el nombre de tu ACR
-  IMAGE_NAME: 'acrfinaldevops' # Colocar el Nombre de Imagen
+  IMAGE_NAME: 'rcfinaldevops' # Colocar el Nombre de Imagen
   SERVICE_CONNECTION_NAME: 'acrfinaldevops' # Colocar nombre del Service Connection ubicado en Docker Registry-- Azure Container Registry
 
 jobs:
@@ -22,4 +22,5 @@ jobs:
           dockerfile: '**/Dockerfile'
           tags: |
             latest
+
         displayName: 'Build and Push Docker Image ACR'
