@@ -1,0 +1,53 @@
+trigger:
+- main
+
+variables:
+  VM_IP_PUBLICA: '172.183.106.11'   # IP pública de tu VM
+  DB_NAME: 'wordpress'              # Nombre de la base de datos
+  DB_USER: 'mysqluser'                # Usuario de la base de datos
+  DB_PASSWORD: 'Password123'      # Contraseña del usuario de la base de datos
+
+stages:
+  - stage: DeployWordPress
+    jobs:
+      - deployment: InstallWordPressVM
+        displayName: 'Instalar WordPress + Apache + PHP'
+        environment:
+          name: 'VMLinuxDocker'
+          resourceType: VirtualMachine
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Instalando Apache, PHP y dependencias..."
+                    sudo apt-get update
+                    sudo apt-get install -y apache2 php php-mysql libapache2-mod-php wget unzip curl
+
+                    echo "Descargando e instalando WordPress..."
+                    wget https://wordpress.org/latest.tar.gz
+                    tar -xvzf latest.tar.gz
+                    sudo rm -rf /var/www/html/*
+                    sudo mv wordpress/* /var/www/html/
+
+                    # Ajustar permisos
+                    sudo chown -R www-data:www-data /var/www/html
+                    sudo chmod -R 755 /var/www/html
+
+                    echo "Configurando wp-config.php..."
+                    cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+                    sed -i "s/database_name_here/${DB_NAME}/" /var/www/html/wp-config.php
+                    sed -i "s/username_here/${DB_USER}/" /var/www/html/wp-config.php
+                    sed -i "s/password_here/${DB_PASSWORD}/" /var/www/html/wp-config.php
+                    sed -i "s/localhost/127.0.0.1/" /var/www/html/wp-config.php
+
+                    echo "Reiniciando Apache..."
+                    sudo systemctl enable apache2
+                    sudo systemctl restart apache2
+
+                    echo "WordPress instalado correctamente en Apache."
+                  displayName: 'Instalar y configurar WordPress con Apache'
+
+                - script: |
+                    echo "WordPress disponible en: http://${VM_IP_PUBLICA}"
+                  displayName: 'Mostrar URL final'
