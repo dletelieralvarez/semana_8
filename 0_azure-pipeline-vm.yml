@@ -33,42 +33,7 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       set -e  # Termina el script si cualquier comando falla
-
-      RG=$(resourceGroupName)
-      VM=$(vmName)
-
-      echo "Comprobando estado actual de la VM..."
-      # Si la VM ya existía y está detenida, arráncala
-      POWER=$(az vm get-instance-view -g "$RG" -n "$VM" --query "instanceView.statuses[?starts_with(code, 'PowerState/')].code" -o tsv || true)
-      echo "PowerState actual: ${POWER:-<desconocido>}"
-
-      if [ "$POWER" != "PowerState/running" ]; then
-        echo "Iniciando VM..."
-        az vm start -g "$RG" -n "$VM"
-      fi
-      echo "Esperando a que la VM quede en Running..."
-      az vm wait -g "$RG" -n "$VM" --custom "instanceView.statuses[?code=='PowerState/running']"
-      # El agente puede tardar unos segundos tras el primer arranque
-      for i in {1..30}; do
-        AGENT=$(az vm get-instance-view -g "$RG" -n "$VM" --query "instanceView.vmAgent.statuses[0].displayStatus" -o tsv || true)
-        echo "VM Agent: ${AGENT:-<desconocido>}"
-        if [ "$AGENT" = "Ready" ]; then
-          break
-        fi
-        sleep 10
-      done
-
-      if [ "$AGENT" != "Ready" ]; then
-        echo "El agente aún no está listo. Aborting."
-        exit 1
-      fi
-
-      echo "VM en Running y agente Ready. IP pública:"
-      az vm show -d -g "$RG" -n "$VM" --query publicIps -o tsv
-
-      # Asegurar que se usa la suscripción correcta
-      # az account set --subscription "f6af4379-6c58-4d36-993c-26b340cf3232"
-
+      
       # Crear un grupo de recursos
       echo "Creando grupo de recursos..."
       az group create --name $(resourceGroupName) --location "$(location)"
@@ -111,6 +76,7 @@ steps:
       # az vm run-command invoke --resource-group $(resourceGroupName) --name $(vmName) --command-id RunShellScript --scripts "sudo apt update && sudo apt install -y apache2"
       # az vm run-command invoke --resource-group $(resourceGroupName) --name $(vmName) --command-id RunShellScript --scripts "echo 'hola curso devops hemos automatizado el despliegue de maquina virtual desde azure devops' | sudo tee /var/www/html/index.html"
       # echo "Apache instalado y página de bienvenida configurada."
+
 
 
 
