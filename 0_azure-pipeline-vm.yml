@@ -67,7 +67,7 @@ steps:
       az vm show -d -g "$RG" -n "$VM" --query publicIps -o tsv
 
       # Asegurar que se usa la suscripción correcta
-      # az account set --subscription "f6af4379-6c58-4d36-993c-26b340cf3232"
+      # az account set --subscription "72fd0b5a-8a6a-4cff-89f6-bde961f7e250"
 
       # Crear un grupo de recursos
       echo "Creando grupo de recursos..."
@@ -111,6 +111,7 @@ steps:
       # az vm run-command invoke --resource-group $(resourceGroupName) --name $(vmName) --command-id RunShellScript --scripts "sudo apt update && sudo apt install -y apache2"
       # az vm run-command invoke --resource-group $(resourceGroupName) --name $(vmName) --command-id RunShellScript --scripts "echo 'hola curso devops hemos automatizado el despliegue de maquina virtual desde azure devops' | sudo tee /var/www/html/index.html"
       # echo "Apache instalado y página de bienvenida configurada."
+
 
 
 
